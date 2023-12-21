@@ -1,0 +1,35 @@
+.sessionManagement()
+.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+.and()
+.authenticationProvider(authenticationProvider())
+.addFilterBefore(authFilter,UsernamePasswordAuthenticationFilter.class)
+.build();
+
+
+	}
+	
+	
+	//auth filter
+	
+	
+	String authHeader = request.getHeader("Authorization");
+		String token = null;
+		String username = null;
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			token = authHeader.substring(7);
+			username = jwtService.extractUserName(token);
+		}
+
+		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+	UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+	if (jwtService.validateToken(token, userDetails)) {
+	UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+			null, userDetails.getAuthorities());
+		authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+		SecurityContextHolder.getContext().setAuthentication(authToken);
+			}
+		}
+
+		filterChain.doFilter(request, response);
+//expired token
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaHJpc3N5IiwiaWF0IjoxNzAwODc4MzQ3LCJleHAiOjE3MDA4Nzg2NDd9.F87-ilSSG6YsJxQTQ3F_qGgNRjFRZV5ZnPuMnYVq-Jw
